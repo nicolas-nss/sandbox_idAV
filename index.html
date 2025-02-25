@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lector NFC para Web</title>
+</head>
+<body>
+    <h1>Lector NFC para Web</h1>
+    <p>Acerca un tag NFC para leerlo.</p>
+    <pre id="nfc-output"></pre>
+
+    <script>
+        const nfcOutput = document.getElementById("nfc-output");
+
+        async function startReadingNFC() {
+            if (!('NDEFReader' in window)) {
+                nfcOutput.textContent = "Web NFC no es compatible en este navegador.";
+                return;
+            }
+
+            try {
+                const nfcReader = new NDEFReader();
+                await nfcReader.scan();
+                nfcOutput.textContent = "Escaneo de NFC iniciado. Acerca un tag NFC.";
+
+                nfcReader.onreading = (event) => {
+                    const message = event.message;
+                    let output = "Datos del tag NFC:\n";
+                    for (const record of message.records) {
+                        output += `Tipo: ${record.recordType}\n`;
+                        output += `Datos: ${new TextDecoder().decode(record.data)}\n\n`;
+                    }
+                    nfcOutput.textContent = output;
+                };
+
+                nfcReader.onreadingerror = (error) => {
+                    nfcOutput.textContent = "Error al leer el tag NFC: " + error;
+                };
+            } catch (error) {
+                nfcOutput.textContent = "Error al iniciar el escaneo NFC: " + error;
+            }
+        }
+
+        startReadingNFC();
+    </script>
+</body>
+</html>
